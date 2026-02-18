@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
 	"os"
+
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -15,8 +16,13 @@ func main() {
 		config: cfg,
 	}
 
+	logger, _ := zap.NewDevelopment()
+	defer logger.Sync()
+
+	zap.ReplaceGlobals(logger)
+
 	if err := api.run(api.mount()); err != nil {
-		log.Printf("server has failed to start, err: %s", err)
+		zap.S().Error("server has failed to start, err: ", zap.Error(err))
 		os.Exit(1)
 	}
 }

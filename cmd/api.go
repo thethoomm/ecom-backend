@@ -1,12 +1,12 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"go.uber.org/zap"
 )
 
 func (api *api) mount() http.Handler {
@@ -35,7 +35,7 @@ func (api *api) run(h http.Handler) error {
 		IdleTimeout:  time.Minute,
 	}
 
-	log.Printf("server has been started at add %s", api.config.addr)
+	zap.S().Infof("server has been started at add %s", api.config.addr)
 
 	return server.ListenAndServe()
 }
