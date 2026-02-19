@@ -6,6 +6,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v5"
+	repo "github.com/thethoomm/ecom/backend/internal/adapters/postgresql/sqlc"
 	"github.com/thethoomm/ecom/backend/internal/products"
 	"go.uber.org/zap"
 )
@@ -24,9 +26,10 @@ func (api *api) mount() http.Handler {
 		w.Write([]byte("i am good"))
 	})
 
-	productService := products.NewService()
+	productService := products.NewService(repo.New(api.db))
 	productHandler := products.NewHandler(productService)
 	router.Get("/products", productHandler.ListProducts)
+	router.Get("/products/{id}", productHandler.FindProductById)
 
 	return router
 }
@@ -47,6 +50,7 @@ func (api *api) run(h http.Handler) error {
 
 type api struct {
 	config config
+	db     *pgx.Conn
 }
 
 type config struct {
