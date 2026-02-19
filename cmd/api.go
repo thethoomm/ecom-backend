@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/thethoomm/ecom/backend/internal/products"
 	"go.uber.org/zap"
 )
 
@@ -22,6 +23,10 @@ func (api *api) mount() http.Handler {
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("i am good"))
 	})
+
+	productService := products.NewService()
+	productHandler := products.NewHandler(productService)
+	router.Get("/products", productHandler.ListProducts)
 
 	return router
 }
