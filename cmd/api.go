@@ -55,5 +55,5 @@ type config struct {
 }
 
 type dbConfig struct {
-	dsn string
+	url string
 }
