@@ -9,17 +9,17 @@ import (
 	"go.uber.org/zap"
 )
 
-type handler struct {
-	service Service
+type productsHandler struct {
+	service ProductsService
 }
 
-func NewHandler(service Service) *handler {
-	return &handler{
+func NewProductsHandler(service ProductsService) *productsHandler {
+	return &productsHandler{
 		service: service,
 	}
 }
 
-func (h *handler) ListProducts(w http.ResponseWriter, r *http.Request) {
+func (h *productsHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 	products, err := h.service.ListProducts(r.Context())
 
 	if err != nil {
@@ -31,7 +31,7 @@ func (h *handler) ListProducts(w http.ResponseWriter, r *http.Request) {
 	json.Write(w, http.StatusOK, products)
 }
 
-func (h *handler) FindProductById(w http.ResponseWriter, r *http.Request) {
+func (h *productsHandler) FindProductById(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		zap.S().Error(err)
