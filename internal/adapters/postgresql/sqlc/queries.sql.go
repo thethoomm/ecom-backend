@@ -7,7 +7,38 @@ package repo
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createUser = `-- name: CreateUser :one
+INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, created_at
+`
+
+type CreateUserParams struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type CreateUserRow struct {
+	ID        int64              `json:"id"`
+	Name      string             `json:"name"`
+	Email     string             `json:"email"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
+	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email, arg.Password)
+	var i CreateUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.CreatedAt,
+	)
+	return i, err
+}
 
 const findProductById = `-- name: FindProductById :one
 SELECT id, name, price, quantity, created_at FROM products WHERE id = $1

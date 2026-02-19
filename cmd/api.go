@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	repo "github.com/thethoomm/ecom/backend/internal/adapters/postgresql/sqlc"
 	"github.com/thethoomm/ecom/backend/internal/products"
+	"github.com/thethoomm/ecom/backend/internal/users"
 	"go.uber.org/zap"
 )
 
@@ -26,10 +27,20 @@ func (api *api) mount() http.Handler {
 		w.Write([]byte("i am good"))
 	})
 
-	productService := products.NewService(repo.New(api.db))
-	productHandler := products.NewHandler(productService)
-	router.Get("/products", productHandler.ListProducts)
-	router.Get("/products/{id}", productHandler.FindProductById)
+	repository := repo.New(api.db)
+
+	productService := products.NewProductsService(repository)
+	productHandler := products.NewProductsHandler(productService)
+	router.Route("/products", func(r chi.Router) {
+		r.Get("/", productHandler.ListProducts)
+		r.Get("/{id}", productHandler.FindProductById)
+	})
+
+	usersService := users.NewUsersService(repository)
+	usersHandler := users.NewUsersHandler(usersService)
+	router.Route("/users", func(r chi.Router) {
+		r.Post("/", usersHandler.CreateUser)
+	})
 
 	return router
 }
