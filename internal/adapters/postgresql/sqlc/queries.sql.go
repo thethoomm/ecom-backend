@@ -11,6 +11,57 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createOrder = `-- name: CreateOrder :one
+INSERT INTO orders (customer_id, status) VALUES ($1, $2) RETURNING id, customer_id, status, created_at, updated_at
+`
+
+type CreateOrderParams struct {
+	CustomerID int64       `json:"customer_id"`
+	Status     OrderStatus `json:"status"`
+}
+
+func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
+	row := q.db.QueryRow(ctx, createOrder, arg.CustomerID, arg.Status)
+	var i Order
+	err := row.Scan(
+		&i.ID,
+		&i.CustomerID,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const createOrderItem = `-- name: CreateOrderItem :one
+INSERT INTO order_items (order_id, product_id, price, quantity) VALUES ($1, $2, $3, $4) RETURNING id, order_id, product_id, price, quantity
+`
+
+type CreateOrderItemParams struct {
+	OrderID   int64 `json:"order_id"`
+	ProductID int64 `json:"product_id"`
+	Price     int32 `json:"price"`
+	Quantity  int32 `json:"quantity"`
+}
+
+func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error) {
+	row := q.db.QueryRow(ctx, createOrderItem,
+		arg.OrderID,
+		arg.ProductID,
+		arg.Price,
+		arg.Quantity,
+	)
+	var i OrderItem
+	err := row.Scan(
+		&i.ID,
+		&i.OrderID,
+		&i.ProductID,
+		&i.Price,
+		&i.Quantity,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, created_at
 `

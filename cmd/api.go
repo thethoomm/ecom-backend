@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5"
 	repo "github.com/thethoomm/ecom/backend/internal/adapters/postgresql/sqlc"
+	"github.com/thethoomm/ecom/backend/internal/orders"
 	"github.com/thethoomm/ecom/backend/internal/products"
 	"github.com/thethoomm/ecom/backend/internal/users"
 	"go.uber.org/zap"
@@ -40,6 +41,12 @@ func (api *api) mount() http.Handler {
 	usersHandler := users.NewUsersHandler(usersService)
 	router.Route("/users", func(r chi.Router) {
 		r.Post("/", usersHandler.CreateUser)
+	})
+
+	ordersService := orders.NewOrdersService(repository, api.db)
+	ordersHandler := orders.NewOrdersHandler(ordersService)
+	router.Route("/orders", func(r chi.Router) {
+		r.Post("/", ordersHandler.PlaceOrder)
 	})
 
 	return router

@@ -2,7 +2,6 @@ package json
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 )
 
@@ -14,7 +13,7 @@ func Write(w http.ResponseWriter, status int, data any) {
 
 func ParseBody(w http.ResponseWriter, r *http.Request, to any) error {
 	if r.Body == nil {
-		return errors.New("request body is empty")
+		return ErrEmptyBody
 	}
 	defer r.Body.Close()
 
