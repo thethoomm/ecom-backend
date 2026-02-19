@@ -137,3 +137,17 @@ func (q *Queries) ListProducts(ctx context.Context) ([]Product, error) {
 	}
 	return items, nil
 }
+
+const updateProductQuantity = `-- name: UpdateProductQuantity :exec
+UPDATE products SET quantity = $2 WHERE id = $1
+`
+
+type UpdateProductQuantityParams struct {
+	ID       int64 `json:"id"`
+	Quantity int32 `json:"quantity"`
+}
+
+func (q *Queries) UpdateProductQuantity(ctx context.Context, arg UpdateProductQuantityParams) error {
+	_, err := q.db.Exec(ctx, updateProductQuantity, arg.ID, arg.Quantity)
+	return err
+}

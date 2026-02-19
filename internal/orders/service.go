@@ -65,13 +65,19 @@ func (s *ordersService) PlaceOrder(ctx context.Context, createOrderWithItemsPara
 			return OrderResponse{}, err
 		}
 		var orderItemResponse OrderItemReponse = OrderItemReponse{
-			ID:       createdItem.ID,
+			ID:       product.ID,
 			Price:    createdItem.Price,
 			Quantity: createdItem.Quantity,
 		}
 		items = append(items, orderItemResponse)
 
-		// update the product stock
+		err = qtx.UpdateProductQuantity(ctx, repo.UpdateProductQuantityParams{
+			ID:       product.ID,
+			Quantity: product.Quantity - item.Quantity,
+		})
+		if err != nil {
+			return OrderResponse{}, err
+		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {
